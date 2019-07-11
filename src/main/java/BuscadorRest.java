@@ -12,18 +12,16 @@ public class BuscadorRest {
         get("/items/search", (req, res) -> {
             res.type("application/json");
             String query = req.queryParams("query");
-            return new Gson().toJsonTree(itemService.getItemsSearch(query));
+            String tag = req.queryParams("tag");
+            String priceLow = req.queryParams("priceLow");
+            String priceHight = req.queryParams("priceHight");
+            return new Gson().toJsonTree(itemService.getItemsSearch(query, tag, priceLow, priceHight));
         });
 
         get("/items-title", (req, res) -> {
            res.type("application/json");
-           return new Gson().toJsonTree(itemService.getAllItemsTitle());
-        });
-
-        get("/items/tag", (req, res) -> {
-            res.type("application/json");
-            String tag = req.queryParams("tag");
-            return new Gson().toJsonTree(itemService.getItemsByTag(tag));
+            String query = req.queryParams("query");
+           return new Gson().toJsonTree(itemService.getAllItemsTitle(query));
         });
 
     }

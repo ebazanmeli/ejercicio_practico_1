@@ -17,19 +17,38 @@ import java.util.stream.Collectors;
 
 public class ItemServiceImpl implements ItemService {
 
-    private HashMap<Integer, Item> itemHashMap;
+    private HashMap<String, Item[]> itemHashMap;
 
     public ItemServiceImpl() {
         itemHashMap = new HashMap<>();
     }
 
-    public ItemServiceImpl(HashMap<Integer, Item> itemHashMap) {
+    public ItemServiceImpl(HashMap<String, Item[]> itemHashMap) {
         this.itemHashMap = itemHashMap;
     }
 
     @Override
-    public Item[] getItemsSearch(String query) {
+    public Collection<Item> getItemsSearch(String query, String tag, String priceLow, String priceHight) {
+        Collection<Item> itemCollection;
+        if(itemHashMap.get(query) == null) {
+            itemCollection = getAllItems(query);
+        } else {
+            itemCollection = obtenerArrayList(itemHashMap.get(query));
+        }
 
+        if(tag != null) {
+            itemCollection = getItemsByTag(query, tag);
+        }
+
+        if(priceLow != null && priceHight != null) {
+            itemCollection = getItemsByPrice(query, Integer.parseInt(priceLow), Integer.parseInt(priceHight));
+        }
+
+        return itemCollection;
+    }
+
+    private Collection<Item> getAllItems(String query) {
+        Collection<Item> itemCollection = new ArrayList<>();
         Item[] items = null;
         URL url = null;
 
@@ -58,7 +77,9 @@ public class ItemServiceImpl implements ItemService {
             Gson gson = new Gson();
             items = gson.fromJson(jsonObject.getAsJsonArray("results"), Item[].class);
 
-            saveSearch(items);
+            itemCollection = obtenerArrayList(items);
+
+            saveSearch(query, items);
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -68,50 +89,58 @@ public class ItemServiceImpl implements ItemService {
             e.printStackTrace();
         }
 
-        return items;
+        return itemCollection;
     }
 
-    @Override
-    public void saveSearch(Item[] items) {
-        for (int i = 0; i < items.length; i++) {
-            itemHashMap.put(i, items[i]);
+    private Collection<Item> obtenerArrayList(Item[] items) {
+        Collection<Item> itemCollection = new ArrayList<>();
+        for(int i = 0; i < items.length; i++) {
+            itemCollection.add(items[i]);
         }
+        return itemCollection;
+    }
+
+    private void saveSearch(String query, Item[] items) {
+        itemHashMap.put(query, items);
     }
 
     @Override
-    public Collection<String> getAllItemsTitle() {
+    public Collection<String> getAllItemsTitle(String query) {
         Collection<String> titleCollections = new ArrayList<>();
-        for (int i = 0; i < itemHashMap.size(); i++) {
-            titleCollections.add(itemHashMap.get(i).getTitle());
+        Item[] item = itemHashMap.get(query);
+        for (int i = 0; i < item.length; i++) {
+            titleCollections.add(item[i].getTitle());
         }
 
         return titleCollections;
     }
 
-    @Override
-    public Item[] getItemsOrderBy() {
-        return new Item[0];
+    private Collection<Item> getItemsByPrice(String query, Integer priceLow, Integer priceHight) {
+        Item[] item = itemHashMap.get(query);
+        Collection<Item> itemsFiltrados = new ArrayList<>();
+        for (int i = 0; i < item.length; i++) {
+            if(item[i].getPrice() > priceLow && item[i].getPrice() < priceHight) {
+                itemsFiltrados.add(item[i]);
+            }
+        }
+
+        return itemsFiltrados;
     }
 
-    @Override
-    public Item[] getItemsByPrice() {
-        return new Item[0];
-    }
-
-    @Override
-    public Collection<Item> getItemsByTag(String tag) {
-        Collection<Item> itemsCollection = new ArrayList<>();
-        for (int i = 0; i < itemHashMap.size(); i++) {
-            if (itemHashMap.get(i).getTags() != null) {
-                String[] tags = itemHashMap.get(i).getTags();
+    private Collection<Item> getItemsByTag(String query, String tag) {
+        Item[] item = itemHashMap.get(query);
+        Collection<Item> itemsFiltrados = new ArrayList<>();
+        for (int i = 0; i < item.length; i++) {
+            if (item[i].getTags() != null) {
+                String[] tags = item[i].getTags();
                 for (int j = 0; j < tags.length; j++) {
                     if (tags[j].compareTo(tag) == 0) {
-                        itemsCollection.add(itemHashMap.get(i));
+                        itemsFiltrados.add(item[i]);
                     }
                 }
             }
         }
 
-        return itemsCollection;
+        return itemsFiltrados;
     }
 }
