@@ -20,5 +20,11 @@ public class BuscadorRest {
            return new Gson().toJsonTree(itemService.getAllItemsTitle());
         });
 
+        get("/items/tag", (req, res) -> {
+            res.type("application/json");
+            String tag = req.queryParams("tag");
+            return new Gson().toJsonTree(itemService.getItemsByTag(tag));
+        });
+
     }
 }

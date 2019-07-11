@@ -10,18 +10,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
 public class ItemServiceImpl implements ItemService {
 
-    private HashMap<String, Item> itemHashMap;
+    private HashMap<Integer, Item> itemHashMap;
 
     public ItemServiceImpl() {
         itemHashMap = new HashMap<>();
     }
 
-    public ItemServiceImpl(HashMap<String, Item> itemHashMap) {
+    public ItemServiceImpl(HashMap<Integer, Item> itemHashMap) {
         this.itemHashMap = itemHashMap;
     }
 
@@ -72,13 +74,18 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void saveSearch(Item[] items) {
         for (int i = 0; i < items.length; i++) {
-            itemHashMap.put(items[i].getId(), items[i]);
+            itemHashMap.put(i, items[i]);
         }
     }
 
     @Override
-    public Item[] getAllItemsTitle() {
-        return new Item[0];
+    public Collection<String> getAllItemsTitle() {
+        Collection<String> titleCollections = new ArrayList<>();
+        for (int i = 0; i < itemHashMap.size(); i++) {
+            titleCollections.add(itemHashMap.get(i).getTitle());
+        }
+
+        return titleCollections;
     }
 
     @Override
@@ -92,7 +99,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item[] getItemsByTag() {
-        return new Item[0];
+    public Collection<Item> getItemsByTag(String tag) {
+        Collection<Item> itemsCollection = new ArrayList<>();
+        for (int i = 0; i < itemHashMap.size(); i++) {
+            if (itemHashMap.get(i).getTags() != null) {
+                String[] tags = itemHashMap.get(i).getTags();
+                for (int j = 0; j < tags.length; j++) {
+                    if (tags[j].compareTo(tag) == 0) {
+                        itemsCollection.add(itemHashMap.get(i));
+                    }
+                }
+            }
+        }
+
+        return itemsCollection;
     }
 }

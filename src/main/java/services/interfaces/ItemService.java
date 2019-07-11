@@ -2,11 +2,13 @@ package services.interfaces;
 
 import domain.Item;
 
+import java.util.Collection;
+
 public interface ItemService {
     Item[] getItemsSearch(String query);
     void saveSearch(Item[] items);
-    Item[] getAllItemsTitle();
+    Collection<String> getAllItemsTitle();
     Item[] getItemsOrderBy();
     Item[] getItemsByPrice();
-    Item[] getItemsByTag();
+    Collection<Item> getItemsByTag(String tag);
 }
