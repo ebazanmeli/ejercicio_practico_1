@@ -1,3 +1,5 @@
+package domain;
+
 public class Currency {
 
     private String symbol;
@@ -39,7 +41,7 @@ public class Currency {
 
     @Override
     public String toString() {
-        return "Currency{" +
+        return "domain.Currency{" +
                 "symbol='" + symbol + '\'' +
                 ", description='" + description + '\'' +
                 ", decimal_places=" + decimal_places +

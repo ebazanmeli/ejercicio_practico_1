@@ -1,35 +1,23 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.stream.Collectors;
+import com.google.gson.Gson;
+import services.ItemServiceImpl;
+import services.interfaces.ItemService;
 
-import static spark.Spark.post;
+import static spark.Spark.get;
 
 public class BuscadorRest {
     public static void main(String[] args) {
 
-        post("/search", (req, res) -> {
-            String codigo = req.queryParams("codigo");
-            String q = req.queryParams("q");
+        ItemService itemService = new ItemServiceImpl();
 
-            URL url = new URL("https://api.mercadolibre.com/sites/MLA/listing_types");
-            URLConnection urlConnection = url.openConnection();
+        get("/items/search", (req, res) -> {
+            res.type("application/json");
+            String query = req.queryParams("query");
+            return new Gson().toJsonTree(itemService.getItemsSearch(query));
+        });
 
-            HttpURLConnection connection = null;
-            if(urlConnection instanceof HttpURLConnection) {
-                connection = (HttpURLConnection) urlConnection;
-                connection.setRequestMethod("GET");
-                connection.setRequestProperty("Content-Type", "application/json");
-
-            } else {
-                System.out.println("URL inválida");
-            }
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String urlString = in.lines().collect(Collectors.joining());
-            in.close();
+        get("/items-title", (req, res) -> {
+           res.type("application/json");
+           return new Gson().toJsonTree(itemService.getAllItemsTitle());
         });
 
     }

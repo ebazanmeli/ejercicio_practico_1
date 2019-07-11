@@ -1,3 +1,5 @@
+package domain;
+
 import java.util.Arrays;
 
 public class Item {
@@ -101,7 +103,7 @@ public class Item {
 
     @Override
     public String toString() {
-        return "Item{" +
+        return "domain.Item{" +
                 "id='" + id + '\'' +
                 ", site_id='" + site_id + '\'' +
                 ", title='" + title + '\'' +
