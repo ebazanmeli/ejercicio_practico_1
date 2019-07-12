@@ -1,6 +1,6 @@
 import com.google.gson.Gson;
 import domain.Item;
-import services.ItemServiceImpl;
+import services.ItemServiceImplHashMap;
 import services.interfaces.ItemService;
 
 import static spark.Spark.*;
@@ -8,7 +8,7 @@ import static spark.Spark.*;
 public class BuscadorRest {
     public static void main(String[] args) {
 
-        ItemService itemService = new ItemServiceImpl();
+        ItemService itemService = new ItemServiceImplHashMap();
 
         /**
          * Se obtiene el listado de Items según la busqueda realizada
