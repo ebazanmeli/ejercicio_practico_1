@@ -10,9 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ItemServiceImpl implements ItemService {
@@ -51,12 +49,6 @@ public class ItemServiceImpl implements ItemService {
         return itemCollection;
     }
 
-    private Collection<Item> getItemsOrderBy(String query, String orderBy) {
-        Collection<Item> itemCollection = new ArrayList<>();
-        Collection<Item> items = itemHashMap.get(query);
-
-        return itemCollection;
-    }
 
     private Collection<Item> getAllItems(String query) {
         Collection<Item> itemCollection = new ArrayList<>();
@@ -124,6 +116,38 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return titleCollections;
+    }
+
+    private Collection<Item> getItemsOrderBy(String query, String orderBy) {
+        String order = orderBy.split(" ")[0].trim();
+        String way = orderBy.split(" ")[1].trim();
+        Collection<Item> itemCollection = new ArrayList<>();
+        List<Item> items = (List) itemHashMap.get(query);
+        if(way.equalsIgnoreCase("ASC")) {
+            itemCollection.addAll(orderAscendente(order, items));
+        } else if(way.equalsIgnoreCase("DESC")) {
+            itemCollection.addAll(orderDescendente(order, items));
+        }
+
+        return itemCollection;
+    }
+
+    private List<Item> orderAscendente(String order, List<Item> items) {
+        if(order.equalsIgnoreCase("PRICE")) {
+            items.sort(Comparator.comparingInt(Item::getPrice));
+        } else if(order.equalsIgnoreCase("LISTING_TYPE")) {
+            items.sort(Comparator.comparing(Item::getListing_type_id));
+        }
+        return items;
+    }
+
+    private List<Item> orderDescendente(String order, List<Item> items) {
+        if(order.equalsIgnoreCase("PRICE")) {
+            items.sort(Comparator.comparingInt(Item::getPrice).reversed());
+        } else if(order.equalsIgnoreCase("LISTING_TYPE")) {
+            items.sort(Comparator.comparing(Item::getListing_type_id).reversed());
+        }
+        return items;
     }
 
     private Collection<Item> getItemsByPrice(String query, Integer priceLow, Integer priceHight) {
