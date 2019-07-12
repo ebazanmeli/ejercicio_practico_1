@@ -1,6 +1,6 @@
 import com.google.gson.Gson;
 import domain.Item;
-import services.ItemServiceImplHashMap;
+import services.ItemServiceImplementacion;
 import services.interfaces.ItemService;
 
 import static spark.Spark.*;
@@ -8,7 +8,7 @@ import static spark.Spark.*;
 public class BuscadorRest {
     public static void main(String[] args) {
 
-        ItemService itemService = new ItemServiceImplHashMap();
+        ItemService itemService = new ItemServiceImplementacion();
 
         /**
          * Se obtiene el listado de Items según la busqueda realizada
@@ -53,14 +53,20 @@ public class BuscadorRest {
          *              hashmap para identificar la colección de Items según la búsqueda realizada.
          *              Sin este parámetro no se va a poder insertar un item en la lista adecuada.
          *
+         * @param body el Item completo que se agregará a la colección.
+         *
          * @return la confirmación de la inserción <codigo>200</codigo>
          */
         post("/item", (req, res) -> {
             res.type("application/json");
             String query = req.queryParams("query");
             Item item = new Gson().fromJson(req.body(), Item.class);
-            itemService.saveItem(query, item);
-            return new Gson().toJson("SUCCESS");
+            if(itemService.saveItem(query, item)) {
+                return new Gson().toJson("SUCCESS");
+            } else {
+                return new Gson().toJson("FAILD");
+            }
+
         });
 
         /**
@@ -69,6 +75,8 @@ public class BuscadorRest {
          * @param query es la busqueda realizada y el nombre que se le dio al
          *              hashmap para identificar la colección de Items según la búsqueda realizada.
          *              Sin este parámetro no se va a poder actualizar un item en la lista adecuada.
+         *
+         * @param body el Item completo que se actualizará en la colección.
          *
          * @return el Item actualizado
          */
@@ -93,8 +101,11 @@ public class BuscadorRest {
             res.type("application/json");
             String query = req.queryParams("query");
             String id = req.queryParams("id");
-            itemService.deleteItem(query, id);
-            return new Gson().toJson("SUCCESS");
+            if(itemService.deleteItem(query, id)) {
+                return new Gson().toJson("SUCCESS");
+            } else {
+                return new Gson().toJson("FAILD");
+            }
         });
 
     }

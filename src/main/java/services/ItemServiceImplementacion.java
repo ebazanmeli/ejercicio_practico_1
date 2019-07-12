@@ -1,31 +1,33 @@
 package services;
 
 import dao.HashMapDao;
-import dao.IHashMapDao;
+import dao.interfaces.PersistenciaDao;
 import domain.Item;
 import services.interfaces.IServiceConection;
 import services.interfaces.ItemService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-public class ItemServiceImplHashMap implements ItemService {
+public class ItemServiceImplementacion implements ItemService {
 
     private List<Item> itemListTemp = new ArrayList<>();
     private IServiceConection serviceConection;
-    private IHashMapDao hashMapDao;
+    private PersistenciaDao hashMapDao;
 
-    public ItemServiceImplHashMap() {
+    public ItemServiceImplementacion() {
         serviceConection = new ServiceConection();
         hashMapDao = new HashMapDao();
     }
 
     @Override
     public List<Item> getItemsSearch(String query, String tag, String priceLow, String priceHight, String orderBy) {
-        if (!hashMapDao.existHashMap(query)) {
+        if (!hashMapDao.existPersistencia(query)) {
             itemListTemp = serviceConection.getApiResult(query);
-            hashMapDao.saveHashMap(query, itemListTemp);
+            hashMapDao.savePersistencia(query, itemListTemp);
         } else {
-            itemListTemp = hashMapDao.getHashMap(query);
+            itemListTemp = hashMapDao.getPersistencia(query);
         }
 
         if (tag != null) {
@@ -46,7 +48,7 @@ public class ItemServiceImplHashMap implements ItemService {
     @Override
     public List<String> getAllItemsTitle(String query) {
         List<String> titleList = new ArrayList<>();
-        List<Item> items = hashMapDao.getHashMap(query);
+        List<Item> items = hashMapDao.getPersistencia(query);
         for (Item item : items) {
             titleList.add(item.getTitle());
         }
@@ -109,6 +111,7 @@ public class ItemServiceImplHashMap implements ItemService {
                 for (int j = 0; j < tags.length; j++) {
                     if (tags[j].compareTo(tag) == 0) {
                         itemsFiltrados.add(item);
+                        break;
                     }
                 }
             }
@@ -118,30 +121,17 @@ public class ItemServiceImplHashMap implements ItemService {
     }
 
     @Override
-    public void saveItem(String query, Item item) {
-        hashMapDao.addItem(query, item);
+    public boolean saveItem(String query, Item item) {
+        return hashMapDao.addItem(query, item);
     }
 
     @Override
     public Item editItem(String query, Item itemEditado) {
-        List<Item> items = hashMapDao.getHashMap(query);
-        for(Item item : items) {
-            if(item.getId().equalsIgnoreCase(itemEditado.getId())){
-                items.remove(item);
-                items.add(itemEditado);
-            }
-        }
-
-        return itemEditado;
+        return hashMapDao.editItem(query, itemEditado);
     }
 
     @Override
-    public void deleteItem(String query, String idItemDeleted) {
-        List<Item> items = hashMapDao.getHashMap(query);
-        for(Item item : items) {
-            if(item.getId().equalsIgnoreCase(idItemDeleted)){
-                hashMapDao.deleteItem(query, idItemDeleted);
-            }
-        }
+    public boolean deleteItem(String query, String idItemDeleted) {
+        return hashMapDao.deleteItem(query, idItemDeleted);
     }
 }

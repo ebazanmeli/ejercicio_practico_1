@@ -7,7 +7,7 @@ import java.util.Collection;
 public interface ItemService {
     Collection<Item> getItemsSearch(String query, String tag, String priceLow, String priceHight, String orderBy);
     Collection<String> getAllItemsTitle(String query);
-    void saveItem(String query, Item item);
+    boolean saveItem(String query, Item item);
     Item editItem(String query, Item item);
-    void deleteItem(String query, String idItemDeleted);
+    boolean deleteItem(String query, String idItemDeleted);
 }
