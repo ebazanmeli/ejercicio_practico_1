@@ -17,32 +17,43 @@ import java.util.stream.Collectors;
 
 public class ItemServiceImpl implements ItemService {
 
-    private HashMap<String, Item[]> itemHashMap;
+    private HashMap<String, Collection<Item>> itemHashMap;
 
     public ItemServiceImpl() {
         itemHashMap = new HashMap<>();
     }
 
-    public ItemServiceImpl(HashMap<String, Item[]> itemHashMap) {
+    public ItemServiceImpl(HashMap<String, Collection<Item>> itemHashMap) {
         this.itemHashMap = itemHashMap;
     }
 
     @Override
-    public Collection<Item> getItemsSearch(String query, String tag, String priceLow, String priceHight) {
+    public Collection<Item> getItemsSearch(String query, String tag, String priceLow, String priceHight, String orderBy) {
         Collection<Item> itemCollection;
-        if(itemHashMap.get(query) == null) {
+        if (itemHashMap.get(query) == null) {
             itemCollection = getAllItems(query);
         } else {
-            itemCollection = obtenerArrayList(itemHashMap.get(query));
+            itemCollection = itemHashMap.get(query);
         }
 
-        if(tag != null) {
+        if (tag != null) {
             itemCollection = getItemsByTag(query, tag);
         }
 
-        if(priceLow != null && priceHight != null) {
+        if (priceLow != null && priceHight != null) {
             itemCollection = getItemsByPrice(query, Integer.parseInt(priceLow), Integer.parseInt(priceHight));
         }
+        
+        if(orderBy != null) {
+            itemCollection = getItemsOrderBy(query, orderBy);
+        }
+
+        return itemCollection;
+    }
+
+    private Collection<Item> getItemsOrderBy(String query, String orderBy) {
+        Collection<Item> itemCollection = new ArrayList<>();
+        Collection<Item> items = itemHashMap.get(query);
 
         return itemCollection;
     }
@@ -77,9 +88,9 @@ public class ItemServiceImpl implements ItemService {
             Gson gson = new Gson();
             items = gson.fromJson(jsonObject.getAsJsonArray("results"), Item[].class);
 
-            itemCollection = obtenerArrayList(items);
+            itemCollection = obtenerCollection(items);
 
-            saveSearch(query, items);
+            saveSearch(query, itemCollection);
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -92,35 +103,36 @@ public class ItemServiceImpl implements ItemService {
         return itemCollection;
     }
 
-    private Collection<Item> obtenerArrayList(Item[] items) {
+    private Collection<Item> obtenerCollection(Item[] items) {
         Collection<Item> itemCollection = new ArrayList<>();
-        for(int i = 0; i < items.length; i++) {
+        for (int i = 0; i < items.length; i++) {
             itemCollection.add(items[i]);
         }
         return itemCollection;
     }
 
-    private void saveSearch(String query, Item[] items) {
+    private void saveSearch(String query, Collection<Item> items) {
         itemHashMap.put(query, items);
     }
 
     @Override
     public Collection<String> getAllItemsTitle(String query) {
         Collection<String> titleCollections = new ArrayList<>();
-        Item[] item = itemHashMap.get(query);
-        for (int i = 0; i < item.length; i++) {
-            titleCollections.add(item[i].getTitle());
+        Collection<Item> items = itemHashMap.get(query);
+        for (Item item : items) {
+            titleCollections.add(item.getTitle());
         }
 
         return titleCollections;
     }
 
     private Collection<Item> getItemsByPrice(String query, Integer priceLow, Integer priceHight) {
-        Item[] item = itemHashMap.get(query);
+        Collection<Item> items = itemHashMap.get(query);
         Collection<Item> itemsFiltrados = new ArrayList<>();
-        for (int i = 0; i < item.length; i++) {
-            if(item[i].getPrice() > priceLow && item[i].getPrice() < priceHight) {
-                itemsFiltrados.add(item[i]);
+
+        for (Item item : items) {
+            if (item.getPrice() > priceLow && item.getPrice() < priceHight) {
+                itemsFiltrados.add(item);
             }
         }
 
@@ -128,19 +140,27 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Collection<Item> getItemsByTag(String query, String tag) {
-        Item[] item = itemHashMap.get(query);
+        Collection<Item> items = itemHashMap.get(query);
         Collection<Item> itemsFiltrados = new ArrayList<>();
-        for (int i = 0; i < item.length; i++) {
-            if (item[i].getTags() != null) {
-                String[] tags = item[i].getTags();
+
+        for (Item item : items) {
+            if (item.getTags() != null) {
+                String[] tags = item.getTags();
                 for (int j = 0; j < tags.length; j++) {
                     if (tags[j].compareTo(tag) == 0) {
-                        itemsFiltrados.add(item[i]);
+                        itemsFiltrados.add(item);
                     }
                 }
             }
         }
 
         return itemsFiltrados;
+    }
+
+    @Override
+    public void saveItem(String query, Item item) {
+        Collection<Item> items = itemHashMap.get(query);
+        items.add(item);
+        itemHashMap.put(query, items);
     }
 }
