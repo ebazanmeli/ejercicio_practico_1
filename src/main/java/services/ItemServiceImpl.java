@@ -187,4 +187,27 @@ public class ItemServiceImpl implements ItemService {
         items.add(item);
         itemHashMap.put(query, items);
     }
+
+    @Override
+    public Item editItem(String query, Item itemEditado) {
+        Collection<Item> items = itemHashMap.get(query);
+        for(Item item : items) {
+            if(item.getId().equalsIgnoreCase(itemEditado.getId())){
+                items.remove(item);
+                items.add(itemEditado);
+            }
+        }
+
+        return itemEditado;
+    }
+
+    @Override
+    public void deleteItem(String query, String idItemDeleted) {
+        Collection<Item> items = itemHashMap.get(query);
+        for(Item item : items) {
+            if(item.getId().equalsIgnoreCase(idItemDeleted)){
+                items.remove(item);
+            }
+        }
+    }
 }
